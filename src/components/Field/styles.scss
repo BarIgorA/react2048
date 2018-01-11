@@ -1,8 +1,10 @@
 .Field {
   display: flex;
   flex-wrap: wrap;
-  flex-direction: row;
-  justify-content: flex-start;
-  height: var(--mainHeight);
-  padding: 1vmin
+  width: 100%;
+  margin: 0 auto;
+  padding: 5px;
+  max-width: var(--mainHeight);
+  max-height: var(--mainHeight);
+  background-color: #bdb0a7;
 }

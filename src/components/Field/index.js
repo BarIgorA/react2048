@@ -18,7 +18,7 @@ Field.defaultProps = {
 export default function Field({ className, field, size }) {
 
   return (
-    <main className={className}>
+    <div className={className}>
       {
         field.map(
           (value, index) => (
@@ -30,6 +30,6 @@ export default function Field({ className, field, size }) {
           )
         )
       }
-    </main>
+    </div>
   );
 }

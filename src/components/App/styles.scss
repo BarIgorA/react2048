@@ -1,11 +1,15 @@
 body {
   display: flex;
   justify-content: center;
+  --headerHeight: 25vh;
+  --mainHeight: 75vh;
 }
+
 .App {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  max-width: 1024px;
   width: 100%;
   background-color: #fffff5b7;
   
@@ -13,50 +17,25 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    max-width: 1024px;
-    height: 25vh;
+    height: var(--headerHeight);
     color: #999999;
-  }
-  
-  .title {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 50vw;
-    font-size: 4em;
-  }
 
-  .score-wrapper {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    width: 50vw;
-    padding-right: 5vw;
-    font-size: 0.7em;
-
-    .Score, .HighScore {
+    .title {
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      width: 45%;
-      height: 6vh;
-      padding-bottom: 0.2rem;
-      text-transform: uppercase;
-      background-color: #b3a49f;
-      color: #ffffff;
-      border-radius: 5px;
-      line-height: 2em;
+      width: 50vw;
+      font-size: 4em;
     }
-  }
   
-  .Field {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    max-width: 1024px;
-    min-width: 360px;
-    height: 75vh;
+    .score-wrapper {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 50vw;
+      padding-right: 5vw;
+      font-size: 0.7em;
+    }
   }
 }
 

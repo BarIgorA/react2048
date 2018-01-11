@@ -5,7 +5,8 @@ import './styles.scss';
 
 
 Score.propTypes = {
-  score: PropTypes.number,
+  caption: PropTypes.string,
+  value: PropTypes.number,
   className: PropTypes.string,
 };
 
@@ -13,12 +14,12 @@ Score.defaultProps = {
   className: 'Score',
 };
 
-export default function Score({ score, className }) {
+export default function Score({ caption, value, className }) {
 
   return (
     <span className={className}>
-      score
-      <span className="value">{score}</span>
+      { caption }
+      <span className="value">{value}</span>
     </span>
   );
 }

@@ -1,0 +1,8 @@
+.Field {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: flex-start;
+  height: var(--mainHeight);
+  padding: 1vmin
+}

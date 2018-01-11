@@ -5,5 +5,5 @@ import 'normalize.scss/normalize.scss';
 import App from 'components/App';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementsByClassName('App')[0]);
 registerServiceWorker();

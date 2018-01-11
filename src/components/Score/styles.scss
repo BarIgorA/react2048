@@ -1,4 +1,17 @@
 .Score {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 45%;
+  height: 6vh;
+  padding-bottom: 0.2rem;
+  text-transform: uppercase;
+  background-color: #b3a49f;
+  color: #ffffff;
+  border-radius: 5px;
+  line-height: 2em;
+  
   .value {
     font-size: 1.3em;
     line-height: 0.7em;

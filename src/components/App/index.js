@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Map, List } from 'immutable';
+import classnames from 'classnames';
 
 import './styles.scss';
 import Score from 'components/Score';
@@ -7,16 +7,46 @@ import Field from 'components/Field';
 
 
 class App extends Component {
-  state = Map({
+  state = {
+    inGame: false,
     score: 13011974,
     fieldSize: 4,
-    field: List(Array(16).fill(0)),
-  })
+    field: Array(16).fill(0),
+    lastMoveEvent: {
+      occurredAt: 0,
+      x: 0,
+      y: 0,
+    },
+  }
+
+  stopAndGo = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
+    this.setState({ inGame: !this.state.inGame });
+  };
+
+  mouseMove = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
+    if (
+      !(
+        this.state.inGame && this.mouseMoveReleased(e)
+      )
+    ) return;
+    const { lastMoveEvent } = this.state;
+    lastMoveEvent.occurredAt = e.timeStamp;
+    this.setState({ lastMoveEvent });
+  };
+
+  mouseMoveReleased = (e) => {
+    const MOUSE_MOVE_THROTTLING = 135;
+    const { lastMoveEvent } = this.state;
+    return e.timeStamp - lastMoveEvent.occurredAt > MOUSE_MOVE_THROTTLING;
+  };
 
   render() {
-    const score = this.state.get('score'); 
-    const fieldSize = this.state.get('fieldSize');
-    const field = this.state.get('field');
+    const { score, fieldSize, field, inGame } = this.state; 
+
     return (
       <Fragment>
         <header className="header">
@@ -29,7 +59,13 @@ class App extends Component {
           </div>
         </header>
         <main>
-          <Field size={fieldSize} field={field} />
+          <Field
+            cb={this.stopAndGo}
+            className={classnames('Field', { inGame: inGame })}
+            field={field}
+            mouseMove={this.mouseMove}
+            size={fieldSize}
+          />
         </main>
       </Fragment>
     );

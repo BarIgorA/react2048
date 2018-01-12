@@ -6,8 +6,10 @@ import './styles.scss';
 
 
 Field.propTypes = {
+  cb: PropTypes.func,
   className: PropTypes.string,
-  field: PropTypes.object,
+  field: PropTypes.array.isRequired,
+  mouseMove: PropTypes.func,
   size: PropTypes.number.isRequired,
 };
 
@@ -15,10 +17,15 @@ Field.defaultProps = {
   className: 'Field',
 };
 
-export default function Field({ className, field, size }) {
+export default function Field({ className, field, size, cb, mouseMove }) {
 
   return (
-    <div className={className}>
+    <a
+      href=""
+      className={className}
+      onClick={cb}
+      onMouseMove={mouseMove}
+    >
       {
         field.map(
           (value, index) => (
@@ -30,6 +37,6 @@ export default function Field({ className, field, size }) {
           )
         )
       }
-    </div>
+    </a>
   );
 }

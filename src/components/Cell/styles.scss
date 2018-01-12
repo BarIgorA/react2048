@@ -1,6 +1,79 @@
 .Cell-4 {
   display: flex;
-  justify-content: flex-start;
-  width: 24.5vmin;
-  height: 24.5vmin;
+  align-items: center;
+  justify-content: center;
+  //width: 24.5vmin;
+  //height: 24.5vmin;
+  flex: 1 0 calc(25% - 10px);
+  margin: .1em;
+  border-radius: 5px;
+  background-color: #d9ccc4;
+  color: #7f7367;
+  font-size: 2em;
+  font-family: 'Nunito Sans', sans-serif;
+
+  &.num-2 {
+    background-color: #f0e4d8;
+  }
+  
+  &.num-4 {
+    background-color: #eedfca;
+  }
+
+  &.num-8 {
+    background-color: #f0b17b;
+    color: #fff;
+  }
+
+  &.num-16 {
+    background-color: #f59563;
+    color: #fff;
+  }
+
+  &.num-32 {
+    background-color: #f57c5f;
+    color: #fff;
+  }
+
+  &.num-64 {
+    background-color: #f75e3c;
+    color: #fff;
+  }
+
+  &.num-128 {
+    background-color: #edce73;
+    color: #fff;
+  }
+
+  &.num-256 {
+    background-color: #edcb60;
+    color: #fff;
+  }
+
+  &.num-512 {
+    background-color: #ecc850;
+    color: #fff;
+  }
+
+  &.num-1024 {
+    background-color: #ecc440;
+    color: #fff;
+  }
+
+  &.num-2048 {
+    background-color: #ebc12d;
+    color: #fff;
+  }
+
+  &.num-4096
+   {
+    background-color: #ff3d3d;
+    color: #fff;
+  }
+
+  &:after {
+    display: block;
+    padding-bottom: 100%;
+    content: '';
+  }
 }

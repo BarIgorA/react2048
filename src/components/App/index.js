@@ -20,13 +20,17 @@ class App extends Component {
     return (
       <Fragment>
         <header className="header">
-          <h1 className="title">2048</h1>
-          <span className="score-wrapper">
-            <Score caption="score" value={score} />
-            <Score caption="best" value={score} />
-          </span>
+          <div className="content">
+            <h1 className="title">2048</h1>
+            <span className="score-wrapper">
+              <Score caption="score" value={score} />
+              <Score caption="best" value={score} />
+            </span>
+          </div>
         </header>
-        <Field size={fieldSize} field={field} />
+        <main>
+          <Field size={fieldSize} field={field} />
+        </main>
       </Fragment>
     );
   }

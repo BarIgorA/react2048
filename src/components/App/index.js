@@ -14,15 +14,22 @@ class App extends Component {
     field: Array(16).fill(0),
     lastMoveEvent: {
       occurredAt: 0,
-      x: 0,
-      y: 0,
+      direction: null,
     },
+  }
+
+  componentDidMount() {
+    const domRect = this.fieldDomElement.getBoundingClientRect();
+    this.x = domRect.left + domRect.width / 2;
+    this.y = domRect.top + domRect.height / 2;
+    this.ACCURATE_INTENTION = domRect.width / 4;
+    this.fillRandomEmptyArrayElement();
   }
 
   stopAndGo = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-
-    this.setState({ inGame: !this.state.inGame });
+    const { inGame } = this.state;
+    this.setState({ inGame: !inGame });
   };
 
   mouseMove = (e) => {
@@ -30,22 +37,68 @@ class App extends Component {
 
     if (
       !(
-        this.state.inGame && this.mouseMoveReleased(e)
+        this.state.inGame && this.mouseMoveReleased(e) && this.accurateIntention(e)
       )
     ) return;
-    const { lastMoveEvent } = this.state;
-    lastMoveEvent.occurredAt = e.timeStamp;
-    this.setState({ lastMoveEvent });
+
+    let direction = this.lastMoveDirection(e.clientX, e.clientY);
+
+    if (direction === this.state.lastMoveEvent.direction) return;
+
+    this.setState({
+      lastMoveEvent: {
+        occurredAt: e.timeStamp,
+        direction,
+      }
+    });
+
+    this.fillRandomEmptyArrayElement();
   };
 
   mouseMoveReleased = (e) => {
     const MOUSE_MOVE_THROTTLING = 135;
-    const { lastMoveEvent } = this.state;
-    return e.timeStamp - lastMoveEvent.occurredAt > MOUSE_MOVE_THROTTLING;
+
+    return e.timeStamp - this.state.lastMoveEvent.occurredAt > MOUSE_MOVE_THROTTLING
   };
 
+  accurateIntention = (e) => (
+    Math.abs(e.clientX - this.x) > this.ACCURATE_INTENTION ||
+    Math.abs(e.clientY - this.y) > this.ACCURATE_INTENTION
+  );
+
+  lastMoveDirection = (_x, _y) => {
+    const dx = _x - this.x;
+    const dy = _y - this.y;
+
+    switch(true) {
+      case dx === 0 && dy > 0: return 'down';
+      case dx === 0 && dy < 0: return 'up';
+      case dy / dx >= 1 && dx > 0: return 'down';
+      case dy / dx >= 1 && dx < 0: return 'up';
+      case dy / dx <= -1 && dx < 0: return 'down';
+      case dy / dx <= -1 && dx > 0: return 'up';
+      case dx > 0: return 'right';
+      case dx < 0: return 'left';
+    }
+  };
+
+  twoOrFour = () => (new Date()).getTime() % 10 === 4 ? 4 : 2;
+
+  fillRandomEmptyArrayElement = () => {
+    const { field } = this.state;
+    while (true) { // eslint-disable-line
+      let choosedIndex = Math.floor(Math.random() * field.length);
+      if (field[choosedIndex] === 0) {
+        field[choosedIndex] = this.twoOrFour();
+        break;
+      }
+    }
+
+    this.setState({ field });
+  }
+
   render() {
-    const { score, fieldSize, field, inGame } = this.state; 
+    const { score, fieldSize, field, inGame } = this.state;
 
     return (
       <Fragment>
@@ -65,6 +118,7 @@ class App extends Component {
             field={field}
             mouseMove={this.mouseMove}
             size={fieldSize}
+            fieldRef={(el) => { this.fieldDomElement = el; }}
           />
         </main>
       </Fragment>

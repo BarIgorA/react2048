@@ -12,14 +12,13 @@ Field.propTypes = {
   field: PropTypes.array.isRequired,
   fieldRef: PropTypes.func,
   mouseMove: PropTypes.func,
-  size: PropTypes.number.isRequired,
 };
 
 Field.defaultProps = {
   className: 'Field',
 };
 
-export default function Field({ cb, className, field, fieldRef, mouseMove, size }) {
+export default function Field({ cb, className, field, fieldRef, mouseMove }) {
 
   return (
     <a
@@ -33,7 +32,7 @@ export default function Field({ cb, className, field, fieldRef, mouseMove, size 
         field.map(
           (value, index) => (
             <Cell
-              className={classnames(`Cell-${size}`, { [`num-${value}`]: value })}
+              className={classnames('Cell', { [`num-${value}`]: value })}
               key={index}
               value={value}
             />

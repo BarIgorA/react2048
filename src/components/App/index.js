@@ -9,14 +9,15 @@ import Field from 'components/Field';
 class App extends Component {
   state = {
     inGame: false,
-    score: 13011974,
-    fieldSize: 4,
+    score: 0,
     field: Array(16).fill(0),
     lastMoveEvent: {
       occurredAt: 0,
       direction: null,
     },
   }
+
+  static normalizeField = (array) => array;
 
   componentDidMount() {
     const domRect = this.fieldDomElement.getBoundingClientRect();
@@ -35,11 +36,7 @@ class App extends Component {
   mouseMove = (e) => {
     if (e && e.preventDefault) e.preventDefault();
 
-    if (
-      !(
-        this.state.inGame && this.mouseMoveReleased(e) && this.accurateIntention(e)
-      )
-    ) return;
+    if (!(this.state.inGame && this.mouseMoveReleased(e) && this.accurateIntention(e))) return;
 
     let direction = this.lastMoveDirection(e.clientX, e.clientY);
 
@@ -52,18 +49,18 @@ class App extends Component {
       }
     });
 
+    this.setState({ field: App.normalizeField(App.mergeField(this.transposeField())) });
+
     this.fillRandomEmptyArrayElement();
   };
 
   mouseMoveReleased = (e) => {
     const MOUSE_MOVE_THROTTLING = 135;
-
     return e.timeStamp - this.state.lastMoveEvent.occurredAt > MOUSE_MOVE_THROTTLING
   };
 
   accurateIntention = (e) => (
-    Math.abs(e.clientX - this.x) > this.ACCURATE_INTENTION ||
-    Math.abs(e.clientY - this.y) > this.ACCURATE_INTENTION
+    Math.abs(e.clientX - this.x) > this.ACCURATE_INTENTION || Math.abs(e.clientY - this.y) > this.ACCURATE_INTENTION
   );
 
   lastMoveDirection = (_x, _y) => {
@@ -86,6 +83,9 @@ class App extends Component {
 
   fillRandomEmptyArrayElement = () => {
     const { field } = this.state;
+
+    if (!field.filter((el) => el === 0).length) return false;
+
     while (true) { // eslint-disable-line
       let choosedIndex = Math.floor(Math.random() * field.length);
       if (field[choosedIndex] === 0) {
@@ -95,10 +95,19 @@ class App extends Component {
     }
 
     this.setState({ field });
+
+    return true;
   }
 
+  transposeField = () => {
+    const { field } = this.state;
+    return field;
+  };
+
+  mergeField = (array) => array;
+
   render() {
-    const { score, fieldSize, field, inGame } = this.state;
+    const { score, field, inGame } = this.state;
 
     return (
       <Fragment>
@@ -117,7 +126,6 @@ class App extends Component {
             className={classnames('Field', { inGame: inGame })}
             field={field}
             mouseMove={this.mouseMove}
-            size={fieldSize}
             fieldRef={(el) => { this.fieldDomElement = el; }}
           />
         </main>

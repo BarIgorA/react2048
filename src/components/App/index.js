@@ -4,6 +4,7 @@ import classnames from 'classnames';
 import './styles.scss';
 import Score from 'components/Score';
 import Field from 'components/Field';
+import Transpose from 'transpose';
 
 
 class App extends Component {
@@ -12,12 +13,10 @@ class App extends Component {
     score: 0,
     field: Array(16).fill(0),
     lastMoveEvent: {
-      occurredAt: 0,
+      occurredAt: Date.now(),
       direction: null,
     },
   }
-
-  static normalizeField = (array) => array;
 
   componentDidMount() {
     const domRect = this.fieldDomElement.getBoundingClientRect();
@@ -36,27 +35,37 @@ class App extends Component {
   mouseMove = (e) => {
     if (e && e.preventDefault) e.preventDefault();
 
-    if (!(this.state.inGame && this.mouseMoveReleased(e) && this.accurateIntention(e))) return;
+    const now = Date.now();
 
-    let direction = this.lastMoveDirection(e.clientX, e.clientY);
+    if (!(this.state.inGame && this.mouseMoveReleased(now) && this.accurateIntention(e))) return;
+
+    const direction = this.lastMoveDirection(e.clientX, e.clientY);
 
     if (direction === this.state.lastMoveEvent.direction) return;
 
-    this.setState({
-      lastMoveEvent: {
-        occurredAt: e.timeStamp,
-        direction,
-      }
-    });
-
-    this.setState({ field: App.normalizeField(App.mergeField(this.transposeField())) });
+    this.setState(
+      (prevState) => (
+        {
+          lastMoveEvent: {
+            occurredAt: now,
+            direction,
+          },
+          field: Transpose.normalize(
+            Transpose.merge(
+              Transpose.toLeft(prevState.field, direction)
+            ),
+            direction
+          ),
+        }
+      )
+    );
 
     this.fillRandomEmptyArrayElement();
   };
 
-  mouseMoveReleased = (e) => {
+  mouseMoveReleased = (now) => {
     const MOUSE_MOVE_THROTTLING = 135;
-    return e.timeStamp - this.state.lastMoveEvent.occurredAt > MOUSE_MOVE_THROTTLING
+    return now - this.state.lastMoveEvent.occurredAt > MOUSE_MOVE_THROTTLING
   };
 
   accurateIntention = (e) => (
@@ -81,28 +90,23 @@ class App extends Component {
 
   twoOrFour = () => (new Date()).getTime() % 10 === 4 ? 4 : 2;
 
-  fillRandomEmptyArrayElement = () => {
-    const { field } = this.state;
+  fillRandomEmptyArrayElement = () => this.setState(
+    (prevState) => {
+      const { field } = prevState;
 
-    if (!field.filter((el) => el === 0).length) return false;
+      if (!field.filter((el) => el === 0).length) return field;
 
-    while (true) { // eslint-disable-line
-      let choosedIndex = Math.floor(Math.random() * field.length);
-      if (field[choosedIndex] === 0) {
-        field[choosedIndex] = this.twoOrFour();
-        break;
+      while (true) { // eslint-disable-line
+        let choosedIndex = Math.floor(Math.random() * field.length);
+        if (field[choosedIndex] === 0) {
+          field[choosedIndex] = this.twoOrFour();
+          break;
+        }
       }
+
+      return field;
     }
-
-    this.setState({ field });
-
-    return true;
-  }
-
-  transposeField = () => {
-    const { field } = this.state;
-    return field;
-  };
+  );
 
   mergeField = (array) => array;
 

@@ -24,6 +24,11 @@ class App extends Component {
     this.y = domRect.top + domRect.height / 2;
     this.ACCURATE_INTENTION = domRect.width / 4;
     this.fillRandomEmptyArrayElement();
+    document.addEventListener('keydown', this.keyDown);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.keyDown);
   }
 
   stopAndGo = (e) => {
@@ -32,22 +37,12 @@ class App extends Component {
     this.setState({ inGame: !inGame });
   };
 
-  mouseMove = (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-
-    const now = Date.now();
-
-    if (!(this.state.inGame && this.mouseMoveReleased(now) && this.accurateIntention(e))) return;
-
-    const direction = this.lastMoveDirection(e.clientX, e.clientY);
-
-    if (direction === this.state.lastMoveEvent.direction) return;
-
+  action = (time, direction) => {
     this.setState(
       (prevState) => (
         {
           lastMoveEvent: {
-            occurredAt: now,
+            occurredAt: time,
             direction,
           },
           field: Transpose.normalize(
@@ -61,7 +56,44 @@ class App extends Component {
     );
 
     this.fillRandomEmptyArrayElement();
+  }
+
+  mouseMove = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
+    const now = Date.now();
+
+    if (!(this.state.inGame && this.mouseMoveReleased(now) && this.accurateIntention(e))) return;
+
+    const direction = this.lastMoveDirection(e.clientX, e.clientY);
+
+    if (direction === this.state.lastMoveEvent.direction) return;
+
+    this.action(now, direction);
   };
+
+  keyDown = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const now = Date.now();
+    let direction = null;
+
+    switch(e.keyCode) {
+      case 38:
+        direction = 'up'; break;
+      case 40:
+        direction = 'down'; break;
+      case 37:
+        direction = 'left'; break;
+      case 39:
+        direction = 'right'; break;
+      default:
+        direction = null;
+    }
+
+    if (!direction) return;
+
+    this.action(now, direction);
+  }
 
   mouseMoveReleased = (now) => {
     const MOUSE_MOVE_THROTTLING = 135;
@@ -108,8 +140,6 @@ class App extends Component {
     }
   );
 
-  mergeField = (array) => array;
-
   render() {
     const { score, field, inGame } = this.state;
 
@@ -119,7 +149,7 @@ class App extends Component {
           <div className="content">
             <h1 className="title">2048</h1>
             <span className="score-wrapper">
-              <Score caption="score" value={score} />
+              <Score caption="score" value={Transpose.score} />
               <Score caption="best" value={score} />
             </span>
           </div>
@@ -129,8 +159,8 @@ class App extends Component {
             cb={this.stopAndGo}
             className={classnames('Field', { inGame: inGame })}
             field={field}
-            mouseMove={this.mouseMove}
             fieldRef={(el) => { this.fieldDomElement = el; }}
+            mouseMove={this.mouseMove}
           />
         </main>
       </Fragment>

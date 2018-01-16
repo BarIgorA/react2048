@@ -1,4 +1,6 @@
 export default class Transpose {
+  static score = 0;
+
   static toLeft = (array, from) => {
     switch(from) {
       case 'right':
@@ -61,6 +63,7 @@ export default class Transpose {
           const next = arr[index + 1];
           arr[index + 1] = 0;
           added = true;
+          Transpose.score += (el + next);
           return init.concat(el + next);
         }
         return el > 0 ? init.concat(el) : init;

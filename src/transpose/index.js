@@ -61,10 +61,11 @@ export default class Transpose {
       (init, el, index, arr, added = false) => {
         if (!added && index < arr.length && el === arr[index + 1]) {
           const next = arr[index + 1];
+          const sum = el + next;
           arr[index + 1] = 0;
           added = true;
-          Transpose.score += (el + next);
-          return init.concat(el + next);
+          Transpose.score += sum;
+          return init.concat(sum);
         }
         return el > 0 ? init.concat(el) : init;
       },

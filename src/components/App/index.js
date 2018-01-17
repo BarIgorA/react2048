@@ -4,13 +4,16 @@ import classnames from 'classnames';
 import './styles.scss';
 import Score from 'components/Score';
 import Field from 'components/Field';
+import Modal from 'components/Modal';
 import Transpose from 'transpose';
+import gameStatus from './statuses';
 
 
 class App extends Component {
   state = {
     inGame: false,
-    score: 0,
+    is2048: false,
+    progress: gameStatus.fun,
     field: Array(16).fill(0),
     lastMoveEvent: {
       occurredAt: Date.now(),
@@ -23,7 +26,7 @@ class App extends Component {
     this.x = domRect.left + domRect.width / 2;
     this.y = domRect.top + domRect.height / 2;
     this.ACCURATE_INTENTION = domRect.width / 4;
-    this.fillRandomEmptyArrayElement();
+    this.makeItTwice();
     document.addEventListener('keydown', this.keyDown);
   }
 
@@ -39,20 +42,26 @@ class App extends Component {
 
   action = (time, direction) => {
     this.setState(
-      (prevState) => (
-        {
+      (prevState) => {
+        const { field, progress, is2048 } = prevState;
+        const newField = Transpose.normalize(
+          Transpose.merge(
+            Transpose.toLeft(field, direction)
+          ),
+          direction
+        );
+
+        if (field.toString() === newField.toString()) return { progress: gameStatus.loss };
+
+        return {
           lastMoveEvent: {
             occurredAt: time,
             direction,
           },
-          field: Transpose.normalize(
-            Transpose.merge(
-              Transpose.toLeft(prevState.field, direction)
-            ),
-            direction
-          ),
-        }
-      )
+          field: newField,
+          ...(newField.filter((item) => item === 2048).length && !is2048) ? { is2048: true, progress: gameStatus.win } : progress,
+        };
+      }
     );
 
     this.fillRandomEmptyArrayElement();
@@ -122,6 +131,11 @@ class App extends Component {
 
   twoOrFour = () => (new Date()).getTime() % 10 === 4 ? 4 : 2;
 
+  makeItTwice = () => {
+    this.fillRandomEmptyArrayElement();
+    this.fillRandomEmptyArrayElement();
+  };
+
   fillRandomEmptyArrayElement = () => this.setState(
     (prevState) => {
       const { field } = prevState;
@@ -140,8 +154,33 @@ class App extends Component {
     }
   );
 
+  reset = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    this.setState(
+      {
+        inGame: false,
+        is2048: false,
+        progress: gameStatus.fun,
+        field: Array(14).fill(0).concat(1024, 1024),
+        lastMoveEvent: {
+          occurredAt: Date.now(),
+          direction: null,
+        },
+      }
+    );
+    Transpose.score = 0;
+    this.makeItTwice();
+  }
+
+  closeModal = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    this.setState(
+      { progress: gameStatus.fun }
+    );
+  };
+
   render() {
-    const { score, field, inGame } = this.state;
+    const { score, field, inGame, progress } = this.state;
 
     return (
       <Fragment>
@@ -151,6 +190,14 @@ class App extends Component {
             <span className="score-wrapper">
               <Score caption="score" value={Transpose.score} />
               <Score caption="best" value={score} />
+              <span className="reset">
+                <a
+                  href=""
+                  onClick={this.reset}
+                >
+                  &#10226;
+                </a>
+              </span>
             </span>
           </div>
         </header>
@@ -163,6 +210,11 @@ class App extends Component {
             mouseMove={this.mouseMove}
           />
         </main>
+        <Modal
+          className={classnames('Modal', progress.status)}
+          text={progress.text}
+          cb={this.closeModal}
+        />
       </Fragment>
     );
   }

@@ -161,7 +161,7 @@ class App extends Component {
         inGame: false,
         is2048: false,
         progress: gameStatus.fun,
-        field: Array(14).fill(0).concat(1024, 1024),
+        field: Array(16).fill(0),
         lastMoveEvent: {
           occurredAt: Date.now(),
           direction: null,

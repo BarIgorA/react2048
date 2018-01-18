@@ -5,28 +5,33 @@ import './styles.scss';
 import Score from 'components/Score';
 import Field from 'components/Field';
 import Modal from 'components/Modal';
-import Transpose from 'transpose';
+import Engine from 'Engine';
 import gameStatus from './statuses';
 
 
 class App extends Component {
-  state = {
-    inGame: false,
-    is2048: false,
-    progress: gameStatus.fun,
-    field: Array(16).fill(0),
-    lastMoveEvent: {
-      occurredAt: Date.now(),
-      direction: null,
+  constructor() {
+    super();
+    this.state = {
+      mouseActive: false,
+      is2048: false,
+      progress: gameStatus.fun,
+      field: Array(16).fill(0),
+      lastMoveEvent: {
+        occurredAt: Date.now(),
+        direction: null,
+      },
     },
+    this.engine = new Engine();
   }
 
   componentDidMount() {
+    //mouse
     const domRect = this.fieldDomElement.getBoundingClientRect();
     this.x = domRect.left + domRect.width / 2;
     this.y = domRect.top + domRect.height / 2;
     this.ACCURATE_INTENTION = domRect.width / 4;
-    this.makeItTwice();
+    this.init();
     document.addEventListener('keydown', this.keyDown);
   }
 
@@ -34,24 +39,25 @@ class App extends Component {
     document.removeEventListener('keydown', this.keyDown);
   }
 
+  init = () => {
+    this.engine.score = 0;
+    this.fillRandomEmptyArrayElement();
+    this.fillRandomEmptyArrayElement();
+  };
+
   stopAndGo = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    const { inGame } = this.state;
-    this.setState({ inGame: !inGame });
+    const { mouseActive } = this.state;
+    this.setState({ mouseActive: !mouseActive });
   };
 
   action = (time, direction) => {
     this.setState(
       (prevState) => {
         const { field, progress, is2048 } = prevState;
-        const newField = Transpose.normalize(
-          Transpose.merge(
-            Transpose.toLeft(field, direction)
-          ),
-          direction
-        );
+        const newField = this.engine.next(field, direction);
 
-        if (field.toString() === newField.toString()) return { progress: gameStatus.loss };
+        if (field.toString() === newField.toString() && !this.engine.hasEmpty(newField)) return { progress: gameStatus.loss };
 
         return {
           lastMoveEvent: {
@@ -71,8 +77,9 @@ class App extends Component {
     if (e && e.preventDefault) e.preventDefault();
 
     const now = Date.now();
+    const { mouseActive } =this.state;
 
-    if (!(this.state.inGame && this.mouseMoveReleased(now) && this.accurateIntention(e))) return;
+    if (!(mouseActive && this.mouseMoveReleased(now) && this.accurateIntention(e))) return;
 
     const direction = this.lastMoveDirection(e.clientX, e.clientY);
 
@@ -129,36 +136,15 @@ class App extends Component {
     }
   };
 
-  twoOrFour = () => (new Date()).getTime() % 10 === 4 ? 4 : 2;
-
-  makeItTwice = () => {
-    this.fillRandomEmptyArrayElement();
-    this.fillRandomEmptyArrayElement();
-  };
-
   fillRandomEmptyArrayElement = () => this.setState(
-    (prevState) => {
-      const { field } = prevState;
-
-      if (!field.filter((el) => el === 0).length) return field;
-
-      while (true) { // eslint-disable-line
-        let choosedIndex = Math.floor(Math.random() * field.length);
-        if (field[choosedIndex] === 0) {
-          field[choosedIndex] = this.twoOrFour();
-          break;
-        }
-      }
-
-      return field;
-    }
+    ({ field }) => ({ field: this.engine.fillRandomCell(field) })
   );
 
   reset = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     this.setState(
       {
-        inGame: false,
+        mouseActive: false,
         is2048: false,
         progress: gameStatus.fun,
         field: Array(16).fill(0),
@@ -168,8 +154,7 @@ class App extends Component {
         },
       }
     );
-    Transpose.score = 0;
-    this.makeItTwice();
+    this.init();
   }
 
   closeModal = (e) => {
@@ -180,7 +165,7 @@ class App extends Component {
   };
 
   render() {
-    const { score, field, inGame, progress } = this.state;
+    const { field, mouseActive, progress } = this.state;
 
     return (
       <Fragment>
@@ -188,8 +173,8 @@ class App extends Component {
           <div className="content">
             <h1 className="title">2048</h1>
             <span className="score-wrapper">
-              <Score caption="score" value={Transpose.score} />
-              <Score caption="best" value={score} />
+              <Score caption="score" value={this.engine.score} />
+              <Score caption="best" value={this.engine.best} />
               <span className="reset">
                 <a
                   href=""
@@ -204,7 +189,7 @@ class App extends Component {
         <main>
           <Field
             cb={this.stopAndGo}
-            className={classnames('Field', { inGame: inGame })}
+            className={classnames('Field', { inGame: mouseActive })}
             field={field}
             fieldRef={(el) => { this.fieldDomElement = el; }}
             mouseMove={this.mouseMove}

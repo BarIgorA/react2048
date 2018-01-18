@@ -12,17 +12,12 @@ import gameStatus from './statuses';
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      mouseActive: false,
-      is2048: false,
-      progress: gameStatus.fun,
-      field: Array(16).fill(0),
-      lastMoveEvent: {
-        occurredAt: Date.now(),
-        direction: null,
-      },
-    },
-    this.engine = new Engine();
+    this.state = {},
+    this.engine = new Engine(this);
+  }
+
+  componentWillMount() {
+    this.engine.init();
   }
 
   componentDidMount() {
@@ -31,7 +26,6 @@ class App extends Component {
     this.x = domRect.left + domRect.width / 2;
     this.y = domRect.top + domRect.height / 2;
     this.ACCURATE_INTENTION = domRect.width / 4;
-    this.init();
     document.addEventListener('keydown', this.keyDown);
   }
 
@@ -39,39 +33,11 @@ class App extends Component {
     document.removeEventListener('keydown', this.keyDown);
   }
 
-  init = () => {
-    this.engine.score = 0;
-    this.fillRandomEmptyArrayElement();
-    this.fillRandomEmptyArrayElement();
-  };
-
-  stopAndGo = (e) => {
+  mouse = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     const { mouseActive } = this.state;
     this.setState({ mouseActive: !mouseActive });
   };
-
-  action = (time, direction) => {
-    this.setState(
-      (prevState) => {
-        const { field, progress, is2048 } = prevState;
-        const newField = this.engine.next(field, direction);
-
-        if (field.toString() === newField.toString() && !this.engine.hasEmpty(newField)) return { progress: gameStatus.loss };
-
-        return {
-          lastMoveEvent: {
-            occurredAt: time,
-            direction,
-          },
-          field: newField,
-          ...(newField.filter((item) => item === 2048).length && !is2048) ? { is2048: true, progress: gameStatus.win } : progress,
-        };
-      }
-    );
-
-    this.fillRandomEmptyArrayElement();
-  }
 
   mouseMove = (e) => {
     if (e && e.preventDefault) e.preventDefault();
@@ -85,7 +51,7 @@ class App extends Component {
 
     if (direction === this.state.lastMoveEvent.direction) return;
 
-    this.action(now, direction);
+    this.engine.action(now, direction);
   };
 
   keyDown = (e) => {
@@ -108,7 +74,7 @@ class App extends Component {
 
     if (!direction) return;
 
-    this.action(now, direction);
+    this.engine.action(now, direction);
   }
 
   mouseMoveReleased = (now) => {
@@ -136,25 +102,9 @@ class App extends Component {
     }
   };
 
-  fillRandomEmptyArrayElement = () => this.setState(
-    ({ field }) => ({ field: this.engine.fillRandomCell(field) })
-  );
-
   reset = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    this.setState(
-      {
-        mouseActive: false,
-        is2048: false,
-        progress: gameStatus.fun,
-        field: Array(16).fill(0),
-        lastMoveEvent: {
-          occurredAt: Date.now(),
-          direction: null,
-        },
-      }
-    );
-    this.init();
+    this.engine.init();
   }
 
   closeModal = (e) => {
@@ -165,7 +115,7 @@ class App extends Component {
   };
 
   render() {
-    const { field, mouseActive, progress } = this.state;
+    const { field, mouseActive, progress, best, score } = this.state;
 
     return (
       <Fragment>
@@ -173,8 +123,8 @@ class App extends Component {
           <div className="content">
             <h1 className="title">2048</h1>
             <span className="score-wrapper">
-              <Score caption="score" value={this.engine.score} />
-              <Score caption="best" value={this.engine.best} />
+              <Score caption="score" value={score} />
+              <Score caption="best" value={best} />
               <span className="reset">
                 <a
                   href=""
@@ -188,7 +138,7 @@ class App extends Component {
         </header>
         <main>
           <Field
-            cb={this.stopAndGo}
+            cb={this.mouse}
             className={classnames('Field', { inGame: mouseActive })}
             field={field}
             fieldRef={(el) => { this.fieldDomElement = el; }}

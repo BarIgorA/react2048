@@ -1,4 +1,11 @@
 import gameStatus from './statuses';
+import {
+  CLOSE_MODAL_WINDOW,
+  INIT_ENGINE,
+  ON_OFF_MOUSE,
+  MOUSE_MOVE,
+} from './constants';
+
 
 export default class Engine {
   constructor(component) {
@@ -33,13 +40,10 @@ export default class Engine {
   action = (time, direction) => {
     this.view.setState(
       (prevState) => {
-        const { field, progress, is2048 } = prevState;
-        const newField = this._next(field, direction);
+        const { field, progress } = prevState;
+        const newField = this._next(field, direction, true);
 
-        if (
-          field.toString() === newField.toString() &&
-          !this._hasEmpty(newField)
-        ) return { progress: gameStatus.loss };
+        if (this._gameOver(field, direction)) return { progress: gameStatus.loss };
 
         return {
           lastMoveEvent: {
@@ -47,7 +51,9 @@ export default class Engine {
             direction,
           },
           field: newField,
-          ...(newField.filter((item) => item === 2048).length && !is2048) ? { is2048: true, progress: gameStatus.win } : progress,
+          ...(this.is2048 && !prevState.is2048) ? { is2048: true, progress: gameStatus.win } : progress,
+          score: this.score,
+          best: this.best,
         };
       }
     );
@@ -57,12 +63,37 @@ export default class Engine {
     );
   };
 
-  _next = (array, direction) => this._normalize(
+  dispatch = (action) => this._viewStateManager(action);
+
+  _next = (array, direction, score = false) => this._normalize(
     this._merge(
-      this._toLeft(array, direction)
+      this._toLeft(array, direction),
+      score
     ),
     direction
   );
+
+  _gameOver = (array, direction) => {
+    const nextFields = ['left', 'right', 'up', 'down'].reduce(
+      (init, item) => {
+        init[item] = this._next(array, item);
+        return init;
+      },
+      {}
+    );
+    const left = nextFields.left.toString();
+    const right = nextFields.right.toString();
+    const up = nextFields.up.toString();
+    const down = nextFields.down.toString();
+
+    return (
+      array.toString() === left &&
+      left === right &&
+      right === up &&
+      up === down &&
+      !this._hasEmpty(nextFields[direction])
+    );
+  }
 
   _twoOrFour = () => (new Date()).getTime() % 10 === 4 ? 4 : 2;
 
@@ -126,11 +157,11 @@ export default class Engine {
     }
   };
 
-  _merge = (array) => [].concat(
+  _merge = (array, score) => [].concat(
     ...Array(4)
       .fill(1)
       .map(
-        (_, index) => this._handleOneLine(array.slice(4 * index, 4 * (index + 1)))
+        (_, index) => this._handleOneLine(array.slice(4 * index, 4 * (index + 1)), score)
       )
   );
 
@@ -139,20 +170,17 @@ export default class Engine {
   _score = (el) => {
     this.score += el;
     if (this.score > this.best) this.best = this.score;
-    this.view.setState({
-      score: this.score,
-      best: this.best,
-    });
+    this.is2048 = this.is2048 || el === 2048;
   };
 
-  _handleOneLine = (array) => {
+  _handleOneLine = (array, score) => {
     const shaken = this._shakeOutEmpty(array).reduce(
       (init, el, index, arr, added = false) => {
         if (!added && index < arr.length && el === arr[index + 1]) {
           el = el + arr[index + 1];
           arr[index + 1] = 0;
           added = true;
-          this._score(el);
+          score && this._score(el);
         }
         return el > 0 ? init.concat(el) : init;
       },
@@ -160,4 +188,55 @@ export default class Engine {
     );
     return [...shaken, ...Array(array.length - shaken.length).fill(0)];
   };
+
+  _mouseMoveReleased = (now) => {
+    const MOUSE_MOVE_THROTTLING = 135;
+    return now - this.view.state.lastMoveEvent.occurredAt > MOUSE_MOVE_THROTTLING
+  };
+
+  _accurateIntention = (_x, _y) => {
+    const ACCURATE_INTENTION = this.view.ACCURATE_INTENTION;
+    return Math.abs(_x - this.view.x) > ACCURATE_INTENTION || Math.abs(_y - this.view.y) > ACCURATE_INTENTION
+  };
+
+  _mouseMoveDirection = (_x, _y) => {
+    const dx = _x - this.view.x;
+    const dy = _y - this.view.y;
+
+    switch(true) {
+      case dx === 0 && dy > 0: return 'down';
+      case dx === 0 && dy < 0: return 'up';
+      case dy / dx >= 1 && dx > 0: return 'down';
+      case dy / dx >= 1 && dx < 0: return 'up';
+      case dy / dx <= -1 && dx < 0: return 'down';
+      case dy / dx <= -1 && dx > 0: return 'up';
+      case dx > 0: return 'right';
+      case dx < 0: return 'left';
+    }
+  };
+
+  _viewStateManager(action) {
+    switch(action.type) {
+      case CLOSE_MODAL_WINDOW:
+        return this.view.setState({ progress: gameStatus.fun });
+      case INIT_ENGINE:
+        return this.init();
+      case ON_OFF_MOUSE:
+        return this.view.setState(({ mouseActive }) => ({ mouseActive: !mouseActive }));
+      case MOUSE_MOVE:
+        {
+          if (
+            !(this.view.state.mouseActive && this._mouseMoveReleased(action.now) && this._accurateIntention(action.x, action.y))
+          ) return null;
+
+          const direction = this._mouseMoveDirection(action.x, action.y);
+
+          if (direction === this.view.state.lastMoveEvent.direction) return null;
+
+          return this.action(action.now, direction);
+        }
+      default:
+      return null;
+    }
+  }
 }

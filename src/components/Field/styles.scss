@@ -7,4 +7,10 @@
   max-width: var(--mainHeight);
   max-height: var(--mainHeight);
   background-color: #bdb0a7;
+  cursor: default;
+  text-decoration: none;
+
+  &.inGame {
+    cursor: move;
+  }
 }

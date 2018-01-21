@@ -13,7 +13,7 @@ export default function Cell({ value, className }) {
 
   return (
     <div className={className}>
-      {value}
+      {value || null}
     </div>
   );
 }

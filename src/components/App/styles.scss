@@ -6,6 +6,7 @@ body {
   --headerHeight: 25vh;
   --mainHeight: 68vh;
   background-color: #fff6f1;
+  user-select: none;
 }
 
 .App {
@@ -15,7 +16,7 @@ body {
   max-width: 1024px;
   width: 100%;
   margin: 0 20px;
-  
+
   .header {
     display: flex;
     height: var(--headerHeight);
@@ -35,13 +36,30 @@ body {
         color: #322d27;
         font-family: 'Nunito Sans', sans-serif;
       }
-    
+
       .score-wrapper {
         display: flex;
-        justify-content: flex-end;
-        align-items: center;
+
+        align-items: flex-end;
+        flex-wrap: wrap;
         width: 50%;
         font-size: 0.7em;
+
+        .reset {
+          display: flex;
+          margin: auto 7% auto 0;
+          justify-content: flex-end;
+          width: 100%;
+
+          a {
+            padding: 2px 7px 2px 4px;
+            color: #fff6f1;
+            background-color: #bdb0a7;
+            font-size: 1.7em;
+            text-decoration: none;
+            cursor: pointer;
+          }
+        }
       }
     }
   }

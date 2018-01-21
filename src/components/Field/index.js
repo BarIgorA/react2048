@@ -1,35 +1,44 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
-import Cell from 'components/Cell';
 import './styles.scss';
+import Cell from 'components/Cell';
 
 
 Field.propTypes = {
+  cb: PropTypes.func,
   className: PropTypes.string,
-  field: PropTypes.object,
-  size: PropTypes.number.isRequired,
+  field: PropTypes.array.isRequired,
+  fieldRef: PropTypes.func,
+  mouseMove: PropTypes.func,
 };
 
 Field.defaultProps = {
   className: 'Field',
 };
 
-export default function Field({ className, field, size }) {
+export default function Field({ cb, className, field, fieldRef, mouseMove }) {
 
   return (
-    <div className={className}>
+    <a
+      href=""
+      className={className}
+      onClick={cb}
+      onMouseMove={mouseMove}
+      ref={fieldRef}
+    >
       {
         field.map(
           (value, index) => (
             <Cell
-              className={`Cell-${size}`}
+              className={classnames('Cell', { [`num-${value}`]: value })}
               key={index}
               value={value}
             />
           )
         )
       }
-    </div>
+    </a>
   );
 }

@@ -4,6 +4,7 @@ import {
   ON_OFF_MOUSE,
   MOUSE_MOVE,
   ARROW_PRESSED,
+  SWIPE,
 } from './constants';
 
 function closeModal() {
@@ -38,10 +39,18 @@ function arrowPressed(direction) {
   };
 }
 
+function swipe(direction) {
+  return {
+    type: SWIPE,
+    direction,
+  };
+}
+
 export {
   arrowPressed,
   closeModal,
   initEngine,
   mouseMove,
   onOffMouse,
+  swipe,
 }

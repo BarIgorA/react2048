@@ -8,6 +8,7 @@ import Modal from 'components/Modal';
 import Engine from 'Engine';
 import Mouse from 'Control/Mouse';
 import Keyboard from 'Control/Keyboard';
+import Swipe from 'Control/Swipe';
 
 class App extends Component {
   constructor() {
@@ -16,6 +17,7 @@ class App extends Component {
     this.engine = new Engine(this);
     this.mouse = new Mouse(this.engine);
     this.keyboard = new Keyboard(this.engine);
+    this.swipe = new Swipe(this.engine);
   }
 
   componentWillMount() {
@@ -25,10 +27,12 @@ class App extends Component {
   componentDidMount() {
     this.mouse.init(this.fieldDomElement);
     this.keyboard.init(document, 'keydown', 'arrows');
+    this.swipe.init();
   }
 
   componentWillUnmount() {
     this.keyboard.stopAll();
+    this.swipe.stop();
   }
 
   render() {

@@ -5,6 +5,7 @@ import {
   ON_OFF_MOUSE,
   MOUSE_MOVE,
   ARROW_PRESSED,
+  SWIPE,
 } from './constants';
 
 
@@ -193,6 +194,8 @@ export default class Engine {
       case MOUSE_MOVE:
           return this.action(action.direction);
       case ARROW_PRESSED:
+        return this.action(action.direction);
+      case SWIPE:
         return this.action(action.direction);
       default:
       return null;

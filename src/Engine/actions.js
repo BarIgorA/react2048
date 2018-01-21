@@ -3,6 +3,7 @@ import {
   INIT_ENGINE,
   ON_OFF_MOUSE,
   MOUSE_MOVE,
+  ARROW_PRESSED,
 } from './constants';
 
 function closeModal() {
@@ -23,18 +24,24 @@ function onOffMouse() {
   };
 }
 
-function mouseMove(now, x, y) {
+function mouseMove(direction) {
   return {
     type: MOUSE_MOVE,
-    now,
-    x,
-    y,
+    direction,
+  };
+}
+
+function arrowPressed(direction) {
+  return {
+    type: ARROW_PRESSED,
+    direction,
   };
 }
 
 export {
+  arrowPressed,
   closeModal,
   initEngine,
-  onOffMouse,
   mouseMove,
+  onOffMouse,
 }

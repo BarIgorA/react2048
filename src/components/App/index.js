@@ -6,14 +6,16 @@ import Score from 'components/Score';
 import Field from 'components/Field';
 import Modal from 'components/Modal';
 import Engine from 'Engine';
-import Controls from 'Controls';
+import Mouse from 'Control/Mouse';
+import Keyboard from 'Control/Keyboard';
 
 class App extends Component {
   constructor() {
     super();
     this.state = {},
     this.engine = new Engine(this);
-    this.controller = new Controls(this.engine);
+    this.mouse = new Mouse(this.engine);
+    this.keyboard = new Keyboard(this.engine);
   }
 
   componentWillMount() {
@@ -21,39 +23,12 @@ class App extends Component {
   }
 
   componentDidMount() {
-    //mouse
-    const domRect = this.fieldDomElement.getBoundingClientRect();
-    this.x = domRect.left + domRect.width / 2;
-    this.y = domRect.top + domRect.height / 2;
-    this.ACCURATE_INTENTION = domRect.width / 4;
-    document.addEventListener('keydown', this.keyDown);
+    this.mouse.init(this.fieldDomElement);
+    this.keyboard.init(document, 'keydown', 'arrows');
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.keyDown);
-  }
-
-  keyDown = (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    const now = Date.now();
-    let direction = null;
-
-    switch(e.keyCode) {
-      case 38:
-        direction = 'up'; break;
-      case 40:
-        direction = 'down'; break;
-      case 37:
-        direction = 'left'; break;
-      case 39:
-        direction = 'right'; break;
-      default:
-        direction = null;
-    }
-
-    if (!direction) return;
-
-    this.engine.action(now, direction);
+    this.keyboard.stopAll();
   }
 
   render() {
@@ -70,7 +45,7 @@ class App extends Component {
               <span className="reset">
                 <a
                   href=""
-                  onClick={this.controller.reset}
+                  onClick={this.mouse.reset}
                 >
                   &#10226;
                 </a>
@@ -80,17 +55,17 @@ class App extends Component {
         </header>
         <main>
           <Field
-            cb={this.controller.mouse}
+            cb={this.mouse.onOff}
             className={classnames('Field', { inGame: mouseActive })}
             field={field}
             fieldRef={(el) => { this.fieldDomElement = el; }}
-            mouseMove={this.controller.mouseMove}
+            mouseMove={mouseActive ? this.mouse.move : null}
           />
         </main>
         <Modal
           className={classnames('Modal', progress.status)}
           text={progress.text}
-          cb={this.controller.closeModal}
+          cb={this.mouse.closeModal}
         />
       </Fragment>
     );

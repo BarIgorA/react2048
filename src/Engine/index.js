@@ -4,6 +4,7 @@ import {
   INIT_ENGINE,
   ON_OFF_MOUSE,
   MOUSE_MOVE,
+  ARROW_PRESSED,
 } from './constants';
 
 
@@ -24,10 +25,6 @@ export default class Engine {
       is2048: false,
       progress: gameStatus.fun,
       field: Array(16).fill(0),
-      lastMoveEvent: {
-        occurredAt: Date.now(),
-        direction: null,
-      },
     });
 
     Array(2).fill(1).map(
@@ -37,7 +34,7 @@ export default class Engine {
     );
   };
 
-  action = (time, direction) => {
+  action = (direction) => {
     this.view.setState(
       (prevState) => {
         const { field, progress } = prevState;
@@ -46,12 +43,8 @@ export default class Engine {
         if (this._gameOver(field, direction)) return { progress: gameStatus.loss };
 
         return {
-          lastMoveEvent: {
-            occurredAt: time,
-            direction,
-          },
           field: newField,
-          ...(this.is2048 && !prevState.is2048) ? { is2048: true, progress: gameStatus.win } : progress,
+          ...(this.is2048 && !prevState.is2048) ? { is2048: true, progress: gameStatus.win } : { progress },
           score: this.score,
           best: this.best,
         };
@@ -101,9 +94,9 @@ export default class Engine {
 
   fillRandomCell = (array) => {
     while (this._hasEmpty(array)) {
-      let choosedIndex = Math.floor(Math.random() * array.length);
-      if (array[choosedIndex] === 0) {
-        array[choosedIndex] = this._twoOrFour();
+      let index = Math.floor(Math.random() * array.length);
+      if (array[index] === 0) {
+        array[index] = this._twoOrFour();
         break;
       }
     }
@@ -189,32 +182,6 @@ export default class Engine {
     return [...shaken, ...Array(array.length - shaken.length).fill(0)];
   };
 
-  _mouseMoveReleased = (now) => {
-    const MOUSE_MOVE_THROTTLING = 135;
-    return now - this.view.state.lastMoveEvent.occurredAt > MOUSE_MOVE_THROTTLING
-  };
-
-  _accurateIntention = (_x, _y) => {
-    const ACCURATE_INTENTION = this.view.ACCURATE_INTENTION;
-    return Math.abs(_x - this.view.x) > ACCURATE_INTENTION || Math.abs(_y - this.view.y) > ACCURATE_INTENTION
-  };
-
-  _mouseMoveDirection = (_x, _y) => {
-    const dx = _x - this.view.x;
-    const dy = _y - this.view.y;
-
-    switch(true) {
-      case dx === 0 && dy > 0: return 'down';
-      case dx === 0 && dy < 0: return 'up';
-      case dy / dx >= 1 && dx > 0: return 'down';
-      case dy / dx >= 1 && dx < 0: return 'up';
-      case dy / dx <= -1 && dx < 0: return 'down';
-      case dy / dx <= -1 && dx > 0: return 'up';
-      case dx > 0: return 'right';
-      case dx < 0: return 'left';
-    }
-  };
-
   _viewStateManager(action) {
     switch(action.type) {
       case CLOSE_MODAL_WINDOW:
@@ -224,17 +191,9 @@ export default class Engine {
       case ON_OFF_MOUSE:
         return this.view.setState(({ mouseActive }) => ({ mouseActive: !mouseActive }));
       case MOUSE_MOVE:
-        {
-          if (
-            !(this.view.state.mouseActive && this._mouseMoveReleased(action.now) && this._accurateIntention(action.x, action.y))
-          ) return null;
-
-          const direction = this._mouseMoveDirection(action.x, action.y);
-
-          if (direction === this.view.state.lastMoveEvent.direction) return null;
-
-          return this.action(action.now, direction);
-        }
+          return this.action(action.direction);
+      case ARROW_PRESSED:
+        return this.action(action.direction);
       default:
       return null;
     }

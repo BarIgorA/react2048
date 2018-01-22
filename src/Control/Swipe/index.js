@@ -40,9 +40,9 @@ export default class Swipe extends Control {
 
   init = () => {
     if (document) {
-      document.addEventListener('touchstart', this.touchStart);
-      document.addEventListener('touchmove', this.touchMove);
-      document.addEventListener('touchend', this.touchEnd);
+      document.addEventListener('touchstart', this.touchStart, {passive: false});
+      document.addEventListener('touchmove', this.touchMove, {passive: false});
+      document.addEventListener('touchend', this.touchEnd, {passive: false});
     }
   };
 

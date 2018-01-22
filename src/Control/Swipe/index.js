@@ -18,6 +18,10 @@ export default class Swipe extends Control {
     };
   };
 
+  touchMove = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+  };
+
   touchEnd = (e) => {
     const changedTouches = e.changedTouches;
     const touchEndPoint = {
@@ -37,6 +41,7 @@ export default class Swipe extends Control {
   init = () => {
     if (document) {
       document.addEventListener('touchstart', this.touchStart);
+      document.addEventListener('touchmove', this.touchMove);
       document.addEventListener('touchend', this.touchEnd);
     }
   };
@@ -44,6 +49,7 @@ export default class Swipe extends Control {
   stop = () => {
     if (document) {
       document.removeEventListener('touchstart', this.touchStart);
+      document.removeEventListener('touchmove', this.touchMove);
       document.removeEventListener('touchend', this.touchEnd);
     }
   };

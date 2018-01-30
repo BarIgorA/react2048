@@ -14,6 +14,7 @@ export default class Engine {
     this.score = 0;
     this.best = 0;
     this.view = component;
+    this.fieldDimension = 4;
   }
 
   init = () => {
@@ -25,7 +26,7 @@ export default class Engine {
       mouseActive: false,
       is2048: false,
       progress: gameStatus.fun,
-      field: Array(16).fill(0),
+      field: Array(this.fieldDimension * this.fieldDimension).fill(0),
     });
 
     Array(2).fill(1).map(
@@ -106,20 +107,36 @@ export default class Engine {
   };
 
   _toLeft = (array, from) => {
+    const upStartIndexArray = Array(this.fieldDimension)
+      .fill(1).map(
+        (_, index) => this.fieldDimension - index -1
+      );
+
+    const downStartIndexArray = Array(this.fieldDimension)
+      .fill(1).map(
+        (_, index) => this.fieldDimension * (this.fieldDimension - 1) + index
+      );
+
+    const offsetArray = Array(this.fieldDimension)
+      .fill(1).map(
+        (_, index) => this.fieldDimension * index
+      );
+
     switch(from) {
       case 'right':
         return []
           .concat(
-            array.slice(0, 4).reverse(),
-            array.slice(4, 8).reverse(),
-            array.slice(8, 12).reverse(),
-            array.slice(12).reverse()
+            ...Array(this.fieldDimension)
+              .fill(1)
+              .map(
+                (_, index) => array.slice(this.fieldDimension * index, this.fieldDimension * (index + 1)).reverse()
+              )
           );
       case 'up':
         return []
           .concat(
-            ...[3, 2, 1, 0].map(
-              (start) => [0, 4, 8, 12].map(
+            ...upStartIndexArray.map(
+              (start) => offsetArray.map(
                 (offset) => array[start + offset]
               )
             )
@@ -127,8 +144,8 @@ export default class Engine {
       case 'down':
         return []
           .concat(
-            ...[12, 13, 14, 15].map(
-              (start) => [0, 4, 8, 12].map(
+            ...downStartIndexArray.map(
+              (start) => offsetArray.map(
                 (offset) => array[start - offset]
               )
             )
@@ -152,10 +169,12 @@ export default class Engine {
   };
 
   _merge = (array, score) => [].concat(
-    ...Array(4)
+    ...Array(this.fieldDimension)
       .fill(1)
       .map(
-        (_, index) => this._handleOneLine(array.slice(4 * index, 4 * (index + 1)), score)
+        (_, index) => this._handleOneLine(
+          array.slice(this.fieldDimension * index, this.fieldDimension * (index + 1)), score
+        )
       )
   );
 

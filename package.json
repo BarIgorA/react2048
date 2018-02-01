@@ -49,6 +49,8 @@
     "test": "node scripts/test.js --env=jsdom"
   },
   "devDependencies": {
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
     "eslint": "^4.15.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-config-google": "^0.9.1",
@@ -88,8 +90,8 @@
       "^react-native$": "react-native-web"
     },
     "moduleDirectories": [
-     "node_modules",
-     "src"
+      "node_modules",
+      "src"
     ],
     "moduleFileExtensions": [
       "web.js",

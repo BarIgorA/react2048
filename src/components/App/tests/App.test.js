@@ -1,8 +1,26 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import PageObject from 'utils/PageObject';
 import App from 'components/App';
 
-it('renders without crashing', () => {
-  const div = document.createElement('div');
-  ReactDOM.render(<App />, div);
+
+/*
+ * (Concrete component's page-object class)
+ * @export
+ * @class AppPO
+ */
+class AppPO extends PageObject {
+  /*
+   * Concrete getters
+   */
+}
+
+const page = (new AppPO()).setComponent(App);
+
+describe('<App />', () => {
+  it('should render App component', () => {
+    expect(
+      page.getShallowRendered(
+        { disableLifecycleMethods: true }
+      ).containsMatchingElement(App)
+    ).toEqual(true);
+  });
 });

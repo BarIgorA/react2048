@@ -27,6 +27,7 @@ export default class Engine {
       is2048: false,
       progress: gameStatus.fun,
       field: Array(this.fieldDimension * this.fieldDimension).fill(0),
+      locale: 'en',
     });
 
     Array(2).fill(1).map(

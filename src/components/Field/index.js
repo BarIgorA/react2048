@@ -4,6 +4,7 @@ import classnames from 'classnames';
 
 import './styles.scss';
 import Cell from 'components/Cell';
+import { subscribe } from 'components/ContextProvider';
 
 
 Field.propTypes = {
@@ -11,6 +12,7 @@ Field.propTypes = {
   className: PropTypes.string,
   field: PropTypes.array.isRequired,
   fieldRef: PropTypes.func,
+  locale: PropTypes.string,
   mouseMove: PropTypes.func,
 };
 
@@ -18,7 +20,7 @@ Field.defaultProps = {
   className: 'Field',
 };
 
-export default function Field({ cb, className, field, fieldRef, mouseMove }) {
+function Field({ cb, className, field, fieldRef, mouseMove, locale }) {
 
   return (
     <a
@@ -32,7 +34,7 @@ export default function Field({ cb, className, field, fieldRef, mouseMove }) {
         field.map(
           (value, index) => (
             <Cell
-              className={classnames('Cell', { [`num-${value}`]: value })}
+              className={classnames('Cell', { [`num-${value}`]: value }, locale)}
               key={index}
               value={value}
             />
@@ -42,3 +44,5 @@ export default function Field({ cb, className, field, fieldRef, mouseMove }) {
     </a>
   );
 }
+
+export default subscribe('locale')(Field);

@@ -36,7 +36,7 @@ class App extends Component {
   }
 
   render() {
-    const { field, mouseActive, progress, best, score } = this.state;
+    const { field, mouseActive, progress, best, score, revert } = this.state;
 
     return (
       <Fragment>
@@ -54,6 +54,17 @@ class App extends Component {
                   &#10226;
                 </a>
               </span>
+              {
+                revert &&
+                <span className="revert">
+                  <a
+                    href=""
+                    onClick={this.mouse.revert}
+                  >
+                    &#11148;
+                  </a>
+                </span>
+              }
             </span>
           </div>
         </header>

@@ -61,7 +61,7 @@ class App extends Component {
                     href=""
                     onClick={this.mouse.revert}
                   >
-                    &#11148;
+                    &#8656;
                   </a>
                 </span>
               }

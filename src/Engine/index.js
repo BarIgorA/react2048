@@ -6,6 +6,7 @@ import {
   MOUSE_MOVE,
   ARROW_PRESSED,
   SWIPE,
+  REVERT,
 } from './constants';
 
 
@@ -15,6 +16,7 @@ export default class Engine {
     this.best = 0;
     this.view = component;
     this.fieldDimension = 4;
+    this.prevState = null;
   }
 
   init = () => {
@@ -27,6 +29,7 @@ export default class Engine {
       is2048: false,
       progress: gameStatus.fun,
       field: Array(this.fieldDimension * this.fieldDimension).fill(0),
+      revert: false,
     });
 
     Array(2).fill(1).map(
@@ -42,6 +45,8 @@ export default class Engine {
         const { field, progress } = prevState;
         const newField = this._next(field, direction, true);
 
+        this.prevState = {...prevState};
+
         if (this._gameOver(field, direction)) return { progress: gameStatus.loss };
 
         return {
@@ -49,6 +54,7 @@ export default class Engine {
           ...(this.is2048 && !prevState.is2048) ? { is2048: true, progress: gameStatus.win } : { progress },
           score: this.score,
           best: this.best,
+          revert: true,
         };
       }
     );
@@ -202,12 +208,24 @@ export default class Engine {
     return [...shaken, ...Array(array.length - shaken.length).fill(0)];
   };
 
+  _revert = () => {
+    this.score = 0;
+    this.view.setState({ ...this.prevState, revert: false });
+  };
+
+  _closeModal = () => {
+    this.is2048 = false;
+    this.view.setState({ progress: gameStatus.fun });
+  };
+
   _viewStateManager(action) {
     switch(action.type) {
       case CLOSE_MODAL_WINDOW:
-        return this.view.setState({ progress: gameStatus.fun });
+        return this._closeModal();
       case INIT_ENGINE:
         return this.init();
+      case REVERT:
+        return this._revert();
       case ON_OFF_MOUSE:
         return this.view.setState(({ mouseActive }) => ({ mouseActive: !mouseActive }));
       case MOUSE_MOVE:

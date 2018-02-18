@@ -4,6 +4,7 @@ import {
   initEngine,
   onOffMouse,
   mouseMove,
+  revert,
 } from 'Engine/actions';
 
 export default class Mouse extends Control {
@@ -20,6 +21,8 @@ export default class Mouse extends Control {
   closeModal = (e) => this.controlAction(e, closeModal);
 
   reset = (e) => this.controlAction(e, initEngine);
+
+  revert = (e) => this.controlAction(e, revert);
 
   onOff = (e) => this.controlAction(e, onOffMouse);
 

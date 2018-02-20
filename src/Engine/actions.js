@@ -5,6 +5,7 @@ import {
   MOUSE_MOVE,
   ARROW_PRESSED,
   SWIPE,
+  REVERT,
 } from './constants';
 
 function closeModal() {
@@ -16,6 +17,12 @@ function closeModal() {
 function initEngine() {
   return {
     type: INIT_ENGINE,
+  };
+}
+
+function revert() {
+  return {
+    type: REVERT,
   };
 }
 
@@ -53,4 +60,5 @@ export {
   mouseMove,
   onOffMouse,
   swipe,
+  revert,
 }

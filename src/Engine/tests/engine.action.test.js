@@ -5,6 +5,7 @@ import {
   mouseMove,
   onOffMouse,
   swipe,
+  revert,
 } from '../actions';
 import {
   CLOSE_MODAL_WINDOW,
@@ -13,6 +14,7 @@ import {
   MOUSE_MOVE,
   ARROW_PRESSED,
   SWIPE,
+  REVERT,
 } from '../constants';
 
 
@@ -78,6 +80,16 @@ describe('Engine actions', () => {
     ).toEqual(
       {
         type: ON_OFF_MOUSE,
+      }
+    );
+  });
+
+  it(`revert action should return object with type: REVERT`, () => {
+    expect(
+      revert()
+    ).toEqual(
+      {
+        type: REVERT,
       }
     );
   });
